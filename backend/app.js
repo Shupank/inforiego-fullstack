@@ -1,3 +1,4 @@
+// app.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -18,16 +19,22 @@ app.use(express.json());
 // Rutas
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/users', userRoutes); // AÑADIDO
+app.use('/api/users', userRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('Servidor Inforiego funcionando');
 });
 
-// Iniciar servidor + DB
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  });
-});
+// Iniciar DB y luego el servidor
+(async () => {
+  try {
+    await connectDB(); // Espera a que se conecte
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('No se pudo iniciar el servidor:', error);
+    process.exit(1);
+  }
+})();

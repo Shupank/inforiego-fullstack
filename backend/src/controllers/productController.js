@@ -1,55 +1,95 @@
-import Product from "../models/productModel.js";
+// src/controllers/productController.js
+import * as productService from '../services/productService.js';
 
-// Obtener todos los productos
+// ========================================
+// GET /api/products
+// ========================================
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("categoria");
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const {
+      page = 1,
+      limit = 10,
+      categoria,
+      minPrice,
+      maxPrice,
+      search,
+      sort = 'createdAt:desc'
+    } = req.query;
+
+    const filters = {};
+    if (categoria) filters.categoria = categoria;
+    if (minPrice || maxPrice) {
+      filters.precio = {};
+      if (minPrice) filters.precio.$gte = Number(minPrice);
+      if (maxPrice) filters.precio.$lte = Number(maxPrice);
+    }
+    if (search) {
+      filters.$or = [
+        { nombre: { $regex: search, $options: 'i' } },
+        { descripcion: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const [field, order] = sort.split(':');
+    const sortObj = { [field]: order === 'asc' ? 1 : -1 };
+
+    const result = await productService.getProductsPaginated({
+      filters,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sort: sortObj
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Obtener producto por ID
+// ========================================
+// GET /api/products/:id
+// ========================================
 export const getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("categoria");
-    if (!product) return res.status(404).json({ message: "Producto no encontrado" });
-    res.status(200).json(product);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const product = await productService.getProductById(req.params.id);
+    res.json(product);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
   }
 };
 
-// Crear producto
+// ========================================
+// POST /api/products
+// ========================================
 export const createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
-    const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const product = await productService.createProduct(req.body);
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
-// Actualizar producto
+// ========================================
+// PUT /api/products/:id
+// ========================================
 export const updateProduct = async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedProduct) return res.status(404).json({ message: "Producto no encontrado" });
-    res.status(200).json(updatedProduct);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const product = await productService.updateProduct(req.params.id, req.body);
+    res.json(product);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
   }
 };
 
-// Eliminar producto
+// ========================================
+// DELETE /api/products/:id
+// ========================================
 export const deleteProduct = async (req, res) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) return res.status(404).json({ message: "Producto no encontrado" });
-    res.status(200).json({ message: "Producto eliminado correctamente" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const result = await productService.deleteProduct(req.params.id);
+    res.json(result);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
   }
 };
