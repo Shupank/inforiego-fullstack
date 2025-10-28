@@ -1,29 +1,49 @@
 // src/middleware/verifyToken.js
-import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js';
+import { verifyToken } from "../utils/jwt.js";
+import userRepository from "../repositories/userRepository.js";
 
-const verifyToken = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+/**
+ * MIDDLEWARE: Verificar JWT + cargar usuario
+ * - Usa verifyToken() de utils/jwt.js
+ * - Busca usuario en repository
+ * - Agrega req.user (sin password)
+ */
+const verifyTokenMiddleware = async (req, res, next) => {
+  const authHeader = req.header("Authorization");
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token no proporcionado' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const error = new Error("Token no proporcionado");
+    error.status = 401;
+    return next(error);
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.replace("Bearer ", "").trim();
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    // 1. Verificar token
+    const payload = verifyToken(token); // ← usa utils/jwt.js
 
+    // 2. Buscar usuario (sin password)
+    const user = await userRepository.getById(payload.userId);
     if (!user) {
-      return res.status(401).json({ message: 'Usuario no encontrado' });
+      const error = new Error("Usuario no encontrado");
+      error.status = 401;
+      return next(error);
     }
 
-    req.user = user; // NECESARIO para admin middleware
+    // 3. Agregar al request
+    req.user = {
+      id: user._id,
+      nombre: user.nombre,
+      email: user.email,
+      role: user.role,
+    };
+
     next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Token inválido o expirado' });
+  } catch (err) {
+    err.status = err.status || 401;
+    next(err);
   }
 };
 
-export default verifyToken;
+export default verifyTokenMiddleware;

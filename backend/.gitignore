@@ -1,0 +1,24 @@
+# Node modules
+node_modules/
+backend/node_modules/
+tpfinalinforiego/node_modules/
+
+# Environment
+.env
+backend/.env
+tpfinalinforiego/.env
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+tpfinalinforiego/dist/

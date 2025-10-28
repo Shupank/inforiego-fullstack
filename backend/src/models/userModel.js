@@ -1,6 +1,6 @@
 // src/models/userModel.js
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs'; // ← CORREGIDO
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email inválido'],
     },
     password: {
       type: String,
@@ -25,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    verified: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
@@ -42,6 +47,16 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// No devolver password en JSON
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
+
+// Índice para login rápido
+userSchema.index({ email: 1 });
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,21 +1,19 @@
 // src/services/productService.js
-import Product from '../models/productModel.js';
+import productRepository from "../repositories/productRepository.js";
 
-// ========================================
-// GET ALL + FILTROS + PAGINACIÓN + ORDEN
-// ========================================
-export const getProductsPaginated = async ({ filters, page, limit, sort }) => {
+/**
+ * GET ALL + FILTROS + PAGINACIÓN + ORDEN
+ * Solo productos del usuario autenticado
+ */
+export const getProductsPaginated = async ({ filters, page, limit, sort, userId }) => {
+  // FORZAR filtro por usuario
+  const userFilters = { ...filters, user: userId };
+
   const skip = (page - 1) * limit;
 
   const [products, total] = await Promise.all([
-    Product.find(filters)
-      .populate('categoria', 'nombre')
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-
-    Product.countDocuments(filters)
+    productRepository.getPaginated(userFilters, skip, limit, sort),
+    productRepository.count(userFilters),
   ]);
 
   const pages = Math.ceil(total / limit);
@@ -23,57 +21,60 @@ export const getProductsPaginated = async ({ filters, page, limit, sort }) => {
   return {
     products,
     pagination: {
-      page,
-      limit,
+      page: parseInt(page),
+      limit: parseInt(limit),
       total,
       pages,
       hasNext: page < pages,
-      hasPrev: page > 1
-    }
+      hasPrev: page > 1,
+    },
   };
 };
 
-// ========================================
-// GET BY ID
-// ========================================
-export const getProductById = async (id) => {
-  const product = await Product.findById(id).populate('categoria', 'nombre');
-  if (!product) throw new Error('Producto no encontrado');
-  return product;
-};
-
-// ========================================
-// CREATE
-// ========================================
-export const createProduct = async (data) => {
-  const { nombre, precio, stock, categoria } = data;
-
-  if (!nombre || !precio || !stock || !categoria) {
-    throw new Error('Faltan campos obligatorios: nombre, precio, stock, categoria');
+/**
+ * GET BY ID + OWNERSHIP
+ */
+export const getByIdAndUser = async (id, userId) => {
+  const product = await productRepository.getByIdAndUser(id, userId);
+  if (!product) {
+    const error = new Error("Producto no encontrado o no autorizado");
+    error.status = 404;
+    throw error;
   }
-
-  return await Product.create(data);
-};
-
-// ========================================
-// UPDATE
-// ========================================
-export const updateProduct = async (id, data) => {
-  const product = await Product.findByIdAndUpdate(
-    id,
-    { $set: data },
-    { new: true, runValidators: true }
-  ).populate('categoria', 'nombre');
-
-  if (!product) throw new Error('Producto no encontrado');
   return product;
 };
 
-// ========================================
-// DELETE
-// ========================================
-export const deleteProduct = async (id) => {
-  const product = await Product.findByIdAndDelete(id);
-  if (!product) throw new Error('Producto no encontrado');
-  return { message: 'Producto eliminado correctamente' };
+/**
+ * CREATE
+ * Validación en middleware → aquí solo lógica
+ */
+export const create = async (productData, userId) => {
+  const data = { ...productData, user: userId };
+  return await productRepository.create(data);
+};
+
+/**
+ * UPDATE + OWNERSHIP
+ */
+export const updateByIdAndUser = async (id, userId, updateData) => {
+  const product = await productRepository.updateByIdAndUser(id, userId, updateData);
+  if (!product) {
+    const error = new Error("Producto no encontrado o no autorizado");
+    error.status = 404;
+    throw error;
+  }
+  return product;
+};
+
+/**
+ * DELETE + OWNERSHIP
+ */
+export const deleteByIdAndUser = async (id, userId) => {
+  const product = await productRepository.deleteByIdAndUser(id, userId);
+  if (!product) {
+    const error = new Error("Producto no encontrado o no autorizado");
+    error.status = 404;
+    throw error;
+  }
+  return { message: "Producto eliminado correctamente" };
 };

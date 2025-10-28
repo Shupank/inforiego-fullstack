@@ -86,13 +86,3 @@ export const validateProduct = [
     next();
   },
 ];
-
-// DELETE /api/categories/:id
-export const deleteCategory = async (req, res) => {
-  try {
-    const result = await categoryService.deleteCategory(req.params.id);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};

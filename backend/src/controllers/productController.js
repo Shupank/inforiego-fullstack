@@ -1,11 +1,14 @@
 // src/controllers/productController.js
-import * as productService from '../services/productService.js';
+import productService from "../services/productService.js";
 
-// ========================================
-// GET /api/products
-// ========================================
-export const getProducts = async (req, res) => {
+/**
+ * GET /api/products
+ * Listar productos del usuario autenticado (con filtros, paginación, etc.)
+ */
+export const getProducts = async (req, res, next) => {
   try {
+    const userId = req.user.id;
+
     const {
       page = 1,
       limit = 10,
@@ -13,10 +16,11 @@ export const getProducts = async (req, res) => {
       minPrice,
       maxPrice,
       search,
-      sort = 'createdAt:desc'
+      sort = "createdAt:desc",
     } = req.query;
 
-    const filters = {};
+    const filters = { user: userId }; // ← CLAVE: solo productos del usuario
+
     if (categoria) filters.categoria = categoria;
     if (minPrice || maxPrice) {
       filters.precio = {};
@@ -25,71 +29,98 @@ export const getProducts = async (req, res) => {
     }
     if (search) {
       filters.$or = [
-        { nombre: { $regex: search, $options: 'i' } },
-        { descripcion: { $regex: search, $options: 'i' } }
+        { nombre: { $regex: search, $options: "i" } },
+        { descripcion: { $regex: search, $options: "i" } },
       ];
     }
 
-    const [field, order] = sort.split(':');
-    const sortObj = { [field]: order === 'asc' ? 1 : -1 };
+    const [field, order] = sort.split(":");
+    const sortObj = { [field]: order === "asc" ? 1 : -1 };
 
     const result = await productService.getProductsPaginated({
       filters,
       page: parseInt(page),
       limit: parseInt(limit),
-      sort: sortObj
+      sort: sortObj,
     });
 
     res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    next(err); // → errorHandler
   }
 };
 
-// ========================================
-// GET /api/products/:id
-// ========================================
-export const getProduct = async (req, res) => {
+/**
+ * GET /api/products/:id
+ * Detalle de producto (solo si es del usuario)
+ */
+export const getProduct = async (req, res, next) => {
   try {
-    const product = await productService.getProductById(req.params.id);
+    const product = await productService.getByIdAndUser(
+      req.params.id,
+      req.user.id
+    );
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
     res.json(product);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+  } catch (err) {
+    next(err);
   }
 };
 
-// ========================================
-// POST /api/products
-// ========================================
-export const createProduct = async (req, res) => {
+/**
+ * POST /api/products
+ * Crear producto
+ */
+export const createProduct = async (req, res, next) => {
   try {
-    const product = await productService.createProduct(req.body);
+    const productData = {
+      ...req.body,
+      user: req.user.id,
+    };
+    const product = await productService.create(productData);
     res.status(201).json(product);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (err) {
+    next(err);
   }
 };
 
-// ========================================
-// PUT /api/products/:id
-// ========================================
-export const updateProduct = async (req, res) => {
+/**
+ * PUT /api/products/:id
+ * Actualizar producto (solo si es del usuario)
+ */
+export const updateProduct = async (req, res, next) => {
   try {
-    const product = await productService.updateProduct(req.params.id, req.body);
+    const product = await productService.updateByIdAndUser(
+      req.params.id,
+      req.user.id,
+      req.body
+    );
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
     res.json(product);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+  } catch (err) {
+    next(err);
   }
 };
 
-// ========================================
-// DELETE /api/products/:id
-// ========================================
-export const deleteProduct = async (req, res) => {
+/**
+ * DELETE /api/products/:id
+ * Eliminar producto (solo si es del usuario)
+ */
+export const deleteProduct = async (req, res, next) => {
   try {
-    const result = await productService.deleteProduct(req.params.id);
-    res.json(result);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
+    const product = await productService.deleteByIdAndUser(
+      req.params.id,
+      req.user.id
+    );
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+    res.json({ message: "Producto eliminado" });
+  } catch (err) {
+    next(err);
   }
 };

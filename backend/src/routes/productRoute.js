@@ -1,3 +1,4 @@
+// src/routes/productRoutes.js
 import express from "express";
 import {
   getProducts,
@@ -6,15 +7,21 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+import { validateProduct } from "../middleware/validateInput.js";
 
 const router = express.Router();
 
-// CRUD Productos
+// === PROTEGER RUTAS SENSIBLES CON JWT ===
+router.use(authMiddleware); // ← TODAS las rutas requieren token
+
+// === VALIDACIÓN DE INPUT (POST/PUT) ===
+router.post("/", validateProduct, createProduct);
+router.put("/:id", validateProduct, updateProduct);
+
+// === CRUD COMPLETO (protegido) ===
 router.get("/", getProducts);
 router.get("/:id", getProduct);
-router.post("/", createProduct);
-router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
 
-// ESTA LÍNEA ES CLAVE:
 export default router;
