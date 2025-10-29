@@ -1,25 +1,30 @@
 {
-  "type": "module",
-  "name": "backend",
+  "name": "inforiego-backend",
   "version": "1.0.0",
+  "description": "API RESTful para Inforiego - TP Final UTN",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "start": "node app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "api",
+    "express",
+    "mongodb",
+    "mongoose",
+    "jwt",
+    "auth"
+  ],
+  "author": "Shupank",
   "license": "ISC",
-  "description": "API RESTful CRUD con capa de servicios y autenticación JWT",
   "dependencies": {
-    "axios": "^1.12.2",
-    "bcrypt": "^5.1.0",
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-validator": "^7.3.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.19.1"
+    "mongoose": "^8.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
