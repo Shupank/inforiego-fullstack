@@ -1,0 +1,14 @@
+.footer {
+  background: linear-gradient(to right, #4fc3f7, #0288d1); /* degradé celeste */
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+  font-size: 1rem;
+  font-weight: 400;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer p {
+  margin: 0;
+  letter-spacing: 0.5px;
+}

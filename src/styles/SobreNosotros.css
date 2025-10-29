@@ -1,0 +1,19 @@
+.sobre-nosotros {
+  padding: 2rem;
+  background-color: #f4f4f4;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.texto {
+  text-align: justify;
+  line-height: 1.6;
+}
+
+.cita {
+  margin-top: 1.5rem;
+  font-style: italic;
+  color: #555;
+  border-left: 4px solid #4CAF50;
+  padding-left: 1rem;
+}

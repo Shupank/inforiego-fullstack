@@ -1,0 +1,19 @@
+.hero-container {
+  position: relative;
+  height: 40vh;
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-start; /* sube el texto */
+  justify-content: flex-end; /* lo pone a la derecha */
+}
+
+.hero-texto {
+  color: rgb(26, 16, 210);
+  font-size: 2rem;
+  font-weight: 900; /* negrita fuerte */
+  padding: 1rem 2rem;
+  text-align: right;
+}

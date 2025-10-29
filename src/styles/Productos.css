@@ -1,0 +1,52 @@
+/* Reutilizamos las variables definidas en Card.css */
+:root {
+  --primary-color: #0a8c5f;
+  --text-dark: #555;
+  --white: #fff;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+}
+
+.productos-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  min-height: 100vh; /* Asegura que la página ocupe toda la altura */
+  background: var(--white);
+}
+
+.productos-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.productos-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.productos-header p {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .productos-page {
+    padding: var(--spacing-md);
+  }
+
+  .productos-header h1 {
+    font-size: 2rem;
+  }
+
+  .productos-header p {
+    font-size: 1rem;
+  }
+}
