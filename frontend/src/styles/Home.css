@@ -1,0 +1,41 @@
+/* src/styles/Home.css */
+
+.contenedor-principal {
+  display: flex; /* Habilita el modo flexbox para las columnas */
+  gap: 20px;     /* Espacio entre las columnas */
+  padding: 10px; /* Espaciado interno general */
+  align-items: flex-start; /* Opcional: alinea los ítems al inicio para que no se estiren */
+}
+
+.contenido {
+  flex: 3; /* El contenido (columna izquierda) ocupará más espacio */
+  min-width: 0; /* Evita desbordamientos */
+}
+
+.sidebar {
+  flex: 1; /* La publicidad (columna derecha) ocupará menos espacio */
+  background-color: #f8f8f8;
+  padding: 15px;
+  border-left: 1px solid #eee; /* Línea divisoria, si la quieres */
+}
+
+/* Media Queries para responsividad (muy importante) */
+@media (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column; /* Apila las columnas en pantallas pequeñas */
+    gap: 0;
+  }
+
+  .contenido,
+  .sidebar {
+    flex: none;
+    width: 100%; /* Ocupan todo el ancho */
+    margin-bottom: 20px; /* Espacio entre ellos cuando están apilados */
+  }
+
+  .sidebar {
+    border-left: none; /* Elimina borde lateral si se apila */
+    border-top: 1px solid #eee; /* Añade un borde superior si lo deseas al apilar */
+    padding-top: 20px;
+  }
+}

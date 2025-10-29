@@ -1,0 +1,27 @@
+/* En src/styles/Home.css (o el CSS de tu Sidebar) */
+
+.ad-banner img {
+  width: 100%;  /* La imagen ocupará el 100% del ancho de su contenedor (.ad-banner) */
+  height: auto; /* La altura se ajustará automáticamente para mantener la proporción */
+  display: block; /* Opcional: Remueve cualquier espacio extra que algunos navegadores añaden debajo de las imágenes */
+}
+
+/* Opcional: Puedes dar un ancho máximo al propio .ad-banner si quieres limitar su tamaño general */
+.ad-banner {
+  max-width: 300px; /* Por ejemplo, el banner no será más ancho de 300px */
+  margin: 0 auto; /* Centra el banner si es más estrecho que su padre */
+}
+
+/* Asegúrate de que el sidebar tenga un ancho definido para que 100% funcione */
+.sidebar {
+  flex: 1; /* Esto ya le da un ancho flexible */
+  /* O podrías darle un ancho fijo si lo prefieres, pero Flexbox es mejor */
+  /* width: 300px; */
+}
+
+/* Media Queries para responsividad (siempre importantes) */
+@media (max-width: 768px) {
+  .ad-banner {
+    max-width: 100%; /* En móviles, que el banner ocupe todo el ancho disponible */
+  }
+}
